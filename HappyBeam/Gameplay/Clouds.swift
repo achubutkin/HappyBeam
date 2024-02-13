@@ -96,7 +96,7 @@ func spawnCloudExact(start: Point3D, end: Point3D, speed: Double) async throws -
     
     cloudAnimate(cloud, kind: .sadBlink, shouldRepeat: false)
     
-    spaceOrigin.addChild(cloud)
+    /* spaceOrigin.addChild(cloud) */
     
     return cloud
 }

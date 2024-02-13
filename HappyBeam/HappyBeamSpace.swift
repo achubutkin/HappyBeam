@@ -12,6 +12,7 @@ import GameController
 import RealityKit
 import SwiftUI
 import HappyBeamAssets
+import ARKit
 
 /// The Full Space that displays when someone plays the game.
 struct HappyBeamSpace: View {
@@ -28,9 +29,9 @@ struct HappyBeamSpace: View {
     @State private var activationSubscription: EventSubscription?
     
     var collisionEntity = Entity()
-    
+
     var body: some View {
-        RealityView { content in
+        RealityView { content, attachments in
             // The root entity.
             content.add(spaceOrigin)
             content.add(cameraAnchor)
@@ -84,7 +85,34 @@ struct HappyBeamSpace: View {
                     }
                 }
             }
-        } update: { updateContent in
+        
+            /*
+            let anchorFloor = AnchorEntity(.plane(.horizontal, classification: [.floor], minimumBounds: [1, 1]))
+            
+            let debugMaterial = SimpleMaterial(color: .orange, roughness: 0.8, isMetallic: false)
+               
+            let debugFloorEntity = ModelEntity(mesh: .generatePlane(width: 1, depth: 1, cornerRadius: 0.1), materials: [debugMaterial])
+            debugFloorEntity.physicsBody?.mode = .static
+            
+            spaceOrigin.addChild(debugFloorEntity)
+            
+            let debugDynamicEntity = ModelEntity(mesh: .generateSphere(radius: 0.1), materials: [debugMaterial])
+            debugDynamicEntity.physicsBody?.isAffectedByGravity = true
+            
+            spaceOrigin.addChild(debugDynamicEntity)
+            
+            debugDynamicEntity.setPosition([0, 1, 0], relativeTo: nil)
+            */
+            
+            if let entity = attachments.entity(for: "h1") {
+                spaceOrigin.addChild(entity)
+                entity.setPosition([0, 1, 0], relativeTo: nil)
+                
+                let newOrientation = Rotation3D(angle: .degrees(Double(90)), axis: .x)
+                entity.orientation = simd_quatf(newOrientation)
+            }
+            
+        } update: { updateContent, attachments in
             let handsCenterTransform = gestureModel.computeTransformOfUserPerformedHeartGesture()
             if let handsCenter = handsCenterTransform {
                 let position = Pose3D(handsCenter)!.position
@@ -129,6 +157,10 @@ struct HappyBeamSpace: View {
                         endBlasterBeam()
                     }
                 }
+            }
+        } attachments: {
+            Attachment(id: "h1") {
+                GuitarDeck()
             }
         }
         .gesture(DragGesture(minimumDistance: 0.0)
@@ -344,8 +376,8 @@ func addFloorBeamMaterials() async throws {
     }
     
     globalHeart = heart
-    spaceOrigin.addChild(turret)
-    spaceOrigin.addChild(heart)
+    /* spaceOrigin.addChild(turret) */
+    /* spaceOrigin.addChild(heart) */
 }
 
 /// Loads assets from the local HappyBeamAssets package.
